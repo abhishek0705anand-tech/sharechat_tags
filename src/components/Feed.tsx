@@ -51,9 +51,6 @@ export default function Feed() {
             <h1 className="text-xl font-black text-gray-900 leading-tight">
               🔥 आज क्या ट्रेंड कर रहा है
             </h1>
-            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
-              HINDI MODE v3 — सभी विवरण हिंदी में
-            </p>
             <p className="text-xs text-gray-500 font-semibold">
               {response?.isMockData ? 'डेमो डेटा दिखाया जा रहा है' : 'लाइव अपडेट्स · टॉप 15 ट्रेंड्स'}
             </p>
