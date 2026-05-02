@@ -27,17 +27,40 @@ A production-grade Trending Tags system built for ShareChat. Automatically ident
 
 ```
 Raw Sources → Fetch (parallel) → Cluster/Dedupe → Score → Rank → 
-Hindi Translation (keyword map) → Cache (6 hours) → API Response
+Batched AI (top 5) + Keyword Fallback (rest) → Cache (6 hours) → API Response
 ```
 
 ### Hindi Content Generation
 
-The system uses a **200+ word Hindi keyword mapping** to generate native Hindi content. Titles and descriptions are composed of real Hindi vocabulary (e.g., "पश्चिम बंगाल चुनाव", "सुप्रीम अदालत") rather than phonetic transliteration of English words.
+The system uses a **hybrid approach** combining batched AI generation with a 200+ word Hindi keyword fallback map.
 
-- **Titles**: Extract known Hindi keywords from English headlines, ordered by appearance
-- **Descriptions**: Category-based proper Hindi sentences (e.g., "यह समाचार भारत में तेज़ी से ट्रेंड कर रहा है")
+#### Batched AI (Top 5 Trends)
+Instead of making 5 separate API calls (which hit rate limits), all top 5 headlines are sent to Groq AI in **a single batched prompt**:
+
+```
+Generate Hindi content for these 5 headlines:
+1. [news] "India tests disaster info system..."
+2. [politics] "Assembly elections: ECI orders..."
+...
+Return JSON: {results: [{index, titleHi, hashtag, descriptionHi}, ...]}
+```
+
+This produces natural, contextual Hindi sentences like:
+- `"भारत में आपदा अलर्ट"`
+- `"बंगाल में फिर से मतदान"`
+
+#### Keyword Fallback (Trends 6-15)
+For remaining trends, the system extracts known Hindi keywords from the headline using a curated 200+ word mapping:
+
+- **Titles**: First 2-3 matched keywords joined in headline order (e.g., `"चुनाव आयोग सुप्रीम अदालत"`)
+- **Descriptions**: Category-based proper Hindi sentences (e.g., `"यह समाचार भारत में तेज़ी से ट्रेंड कर रहा है"`)
 - **Hashtags**: Keyword-based Devanagari hashtags (e.g., `#बंगालचुनाव`, `#सुप्रीमअदालत`)
-- **Groq AI**: Previously used for AI-generated Hindi, disabled due to free-tier rate limits
+
+#### Why This Hybrid?
+| Approach | Quality | Speed | Cost | Reliability |
+|----------|---------|-------|------|-------------|
+| AI-only (5 calls) | ⭐⭐⭐ Natural sentences | ❌ 10-15s | ❌ Hits rate limits | ❌ 429 errors |
+| **Batched AI (1 call) + Keywords** | ⭐⭐⭐ Top 5 natural, rest keyword phrases | ✅ Instant | ✅ 1 API call | ✅ Never fails |
 
 ### Categorization
 
