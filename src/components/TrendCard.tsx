@@ -26,7 +26,7 @@ function MockReel({ seed, likes, category }: { seed: string; likes: string; cate
   return (
     <div className="flex-shrink-0 w-28 rounded-xl overflow-hidden relative bg-gray-200">
       <img
-        src={`https://loremflickr.com/280/420/${keywords}?lock=${seed}`}
+        src={`https://picsum.photos/seed/${seed}/280/420`}
         alt="reel"
         className="w-full h-full object-cover aspect-[2/3]"
         loading="lazy"
@@ -55,7 +55,7 @@ function MockReel({ seed, likes, category }: { seed: string; likes: string; cate
 export default function TrendCard({ trend, onClick }: TrendCardProps) {
   const reelCount = 3 + (trend.rank % 2);
   const reels = Array.from({ length: reelCount }).map((_, i) => ({
-    seed: `${trend.rank}${i}`,
+    seed: `${trend.id.slice(0, 8)}${i}`,
     likes: `${(Math.random() * 90 + 10).toFixed(1)}K`,
   }));
 

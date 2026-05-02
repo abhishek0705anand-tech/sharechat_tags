@@ -95,7 +95,7 @@ export default function TrendDetail({ trend }: TrendDetailProps) {
             return (
               <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-200">
                 <img
-                  src={`https://loremflickr.com/300/400/${kw}?lock=${trend.id.slice(0, 8)}-${i}`}
+                  src={`https://picsum.photos/seed/${trend.id.slice(0, 8)}-${i}/300/400`}
                   alt="post"
                   className="w-full h-full object-cover"
                   loading="lazy"
