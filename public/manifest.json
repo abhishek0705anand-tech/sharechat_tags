@@ -1,0 +1,16 @@
+{
+  "short_name": "SC Trending",
+  "name": "ShareChat Trending",
+  "description": "आज क्या ट्रेंड कर रहा है",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F9FA",
+  "theme_color": "#FF6B35",
+  "icons": [
+    {
+      "src": "sharechat-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+import axios from 'axios';
+import { APIResponse, TrendingTagDetail } from '../types/trending';
+
+const API_BASE = '/api';
+
+export async function fetchTrending(): Promise<APIResponse> {
+  const res = await axios.get<APIResponse>(`${API_BASE}/trending?t=${Date.now()}`);
+  return res.data;
+}
+
+export async function fetchTrendDetail(id: string): Promise<TrendingTagDetail> {
+  const res = await axios.get<{ data: TrendingTagDetail }>(`${API_BASE}/trending/${id}`);
+  return res.data.data;
+}
+
+export function formatPostCount(count?: number): string {
+  if (!count) return '';
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+  return `${count}`;
+}
+
+export const categoryLabels: Record<string, string> = {
+  sports: 'खेल',
+  news: 'समाचार',
+  entertainment: 'मनोरंजन',
+  politics: 'राजनीति',
+  technology: 'टेक्नोलॉजी',
+  lifestyle: 'लाइफस्टाइल',
+  devotional: 'धार्मिक',
+  finance: 'फाइनेंस',
+};

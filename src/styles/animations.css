@@ -1,0 +1,60 @@
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseHeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes sheetEnter {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.card-enter {
+  animation: cardEnter 0.4s ease-out forwards;
+}
+
+.pulse-heat {
+  animation: pulseHeat 2s ease-in-out infinite;
+}
+
+.sheet-enter {
+  animation: sheetEnter 0.3s ease-out forwards;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.card-active:active {
+  transform: scale(0.98);
+  transition: transform 0.1s;
+}
