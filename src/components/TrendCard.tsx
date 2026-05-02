@@ -9,20 +9,7 @@ interface TrendCardProps {
   onClick: () => void;
 }
 
-// India-specific keywords for demo images by category
-const categoryKeywords: Record<string, string> = {
-  sports: 'cricket,ipl,stadium',
-  news: 'india,city,mumbai',
-  entertainment: 'bollywood,movie,dance',
-  politics: 'parliament,india,delhi',
-  technology: 'technology,phone,india',
-  lifestyle: 'yoga,festival,india',
-  devotional: 'temple,diwali,prayer',
-  finance: 'business,money,india',
-};
-
-function MockReel({ seed, likes, category }: { seed: string; likes: string; category: string }) {
-  const keywords = categoryKeywords[category] || 'india,culture,people';
+function MockReel({ seed, likes }: { seed: string; likes: string }) {
   return (
     <div className="flex-shrink-0 w-28 rounded-xl overflow-hidden relative bg-gray-200">
       <img
@@ -121,7 +108,7 @@ export default function TrendCard({ trend, onClick }: TrendCardProps) {
         </p>
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {reels.map((reel, i) => (
-            <MockReel key={i} seed={reel.seed} likes={reel.likes} category={trend.category} />
+            <MockReel key={i} seed={reel.seed} likes={reel.likes} />
           ))}
           <div className="flex-shrink-0 w-28 rounded-xl border-2 border-dashed border-gray-200 aspect-[2/3] flex flex-col items-center justify-center gap-1 bg-gray-50">
             <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">

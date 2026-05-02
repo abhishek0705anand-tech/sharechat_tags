@@ -81,17 +81,6 @@ export default function TrendDetail({ trend }: TrendDetailProps) {
         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">🔥 टॉप पोस्ट</p>
         <div className="grid grid-cols-3 gap-2">
           {[0, 1, 2].map((i) => {
-            const keywords: Record<string, string> = {
-              sports: 'cricket,ipl,stadium',
-              news: 'india,city,mumbai',
-              entertainment: 'bollywood,movie,dance',
-              politics: 'parliament,india,delhi',
-              technology: 'technology,phone,india',
-              lifestyle: 'yoga,festival,india',
-              devotional: 'temple,diwali,prayer',
-              finance: 'business,money,india',
-            };
-            const kw = keywords[trend.category] || 'india,culture,people';
             return (
               <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-200">
                 <img
