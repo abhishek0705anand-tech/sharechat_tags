@@ -24,16 +24,106 @@ A production-grade trending topics discovery system designed for Indian Hindi-sp
 The system follows a modular pipeline architecture with clear separation between data ingestion, processing, and presentation layers.
 
 ```
-+-------------------+     +-------------------+     +-------------------+
-|  Signal Sources   | --> |  Backend Engine   | --> |  React Frontend   |
-|  (4 sources)      |     |  (Node/Express)   |     |  (Mobile-first)   |
-+-------------------+     +-------------------+     +-------------------+
-                                |
-                                v
-                          +-------------+
-                          | File Cache  |
-                          | (6 hour TTL)|
-                          +-------------+
+                    +------------------+
+                    |   API Request    |
+                    |  GET /api/trend  |
+                    +--------+---------+
+                             |
+                             v
+                    +--------+---------+
+                    |   Cache Check    |
+                    |  /tmp/sharechat  |
+                    +--------+---------+
+                             |
+              Cache miss     |     Cache hit
+                             |
+              +--------------+--------------+
+              |                             |
+              v                             v
+   +----------+----------+       +---------+---------+
+   |  Signal Ingestion   |       |   Cached JSON     |
+   |  (Parallel Fetch)   |       |   (6-hour TTL)    |
+   +----------+----------+       +---------+---------+
+              |                             |
+              v                             |
+   +----------+----------+                  |
+   | Google News RSS     |                  |
+   | NewsAPI (India)     |                  |
+   | Reddit (r/india)    |                  |
+   | SerpAPI Trends      |                  |
+   +----------+----------+                  |
+              |                             |
+              v                             |
+   +----------+----------+                  |
+   | Signal Normalizer   |                  |
+   | {source, title,     |                  |
+   |  rawValue}          |                  |
+   +----------+----------+                  |
+              |                             |
+              v                             |
+   +----------+----------+                  |
+   | Fuzzy Clustering &  |                  |
+   | Deduplication       |                  |
+   +----------+----------+                  |
+              |                             |
+              v                             |
+   +----------+----------+                  |
+   | Heat Score Engine   |                  |
+   | weightedSum +       |                  |
+   | freshnessBoost      |                  |
+   +----------+----------+                  |
+              |                             |
+              v                             |
+   +----------+----------+                  |
+   | Top 15 Selector     |                  |
+   +----------+----------+                  |
+              |                             |
+              v                             |
+   +----------+----------+                  |
+   |  Kimi AI Batch Call |                  |
+   |  (Single API call   |                  |
+   |   for all 15)       |                  |
+   +----------+----------+                  |
+              |                             |
+     +--------+--------+                    |
+     |                 |                    |
+     v                 v                    |
++----+----+     +-----+-----+              |
+| Success |     |   Fail    |              |
+| AI Hindi|     | Keyword   |              |
+| Content |     | Fallback  |              |
++----+----+     +-----+-----+              |
+     |                 |                    |
+     +--------+--------+                    |
+              |                             |
+              v                             |
+   +----------+----------+                  |
+   | JSON Response       |<-----------------+
+   | {data, lastUpdated, |
+   |  sourceStatus}      |
+   +----------+----------+
+              |
+              v
+   +----------+----------+
+   |   React Frontend    |
+   |   (Vite + TS)       |
+   +----------+----------+
+              |
+    +---------+---------+
+    |                   |
+    v                   v
++---+----+       +------+------+
+| Trend  |       |  TrendCard  |
+| Feed   |       |  Component  |
+| (List) |       |  (Mobile)   |
++---+----+       +------+------+
+    |                   |
+    v                   v
++---+----+       +------+------+
+| Detail |       |  HeatScore  |
+| Sheet  |       |  Category   |
+| (Drag) |       |  Hashtag    |
++--------+       +-------------+
 ```
 
 ---
