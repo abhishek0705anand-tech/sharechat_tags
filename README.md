@@ -88,29 +88,39 @@ Each cluster receives a heat score (0-100) based on:
 
 This is a two-tier system:
 
-#### Tier 1: Batched AI (Top 5 Trends)
+#### Tier 1: Batched AI (All 15 Trends)
 
-The top 5 ranked clusters are sent to Groq AI (llama-3.3-70b-versatile) in a **single batched API call**. This avoids the rate limiting issues that occur with multiple sequential calls.
+All 15 ranked clusters are sent to Kimi AI (Moonshot, `kimi-k2.5`) in a **single batched API call**. This produces natural, grammatical Hindi sentences for every trend while minimizing API usage.
 
 **Prompt structure:**
 ```
-Generate Hindi content for these 5 trending headlines:
+Generate Hindi content for these 15 trending headlines:
 1. [category] "English headline 1"
 2. [category] "English headline 2"
 ...
-5. [category] "English headline 5"
+15. [category] "English headline 15"
 
 Return JSON with titleHi, hashtag, descriptionHi for each.
 ```
 
+**API Configuration:**
+- **Endpoint:** `https://api.moonshot.ai/v1/chat/completions` (international)
+- **Model:** `kimi-k2.5`
+- **Temperature:** `0.6` (instant mode; thinking disabled for direct output)
+- **Response format:** `json_object` (forces raw JSON without markdown)
+- **Max tokens:** `4096`
+- **Timeout:** `90` seconds
+- **Fallback endpoint:** `https://api.moonshot.cn/v1/chat/completions` (China platform)
+
 **Why batching works:**
-- Reduces API calls from 5 to 1 per request
-- Stays within Groq free tier rate limits (20 requests/minute)
-- Produces natural, contextual Hindi sentences
+- Reduces API calls from 15 to 1 per page load
+- Token usage: ~400 prompt + ~350 completion per 5 trends (~1500 total for 15)
+- Produces natural, contextual Hindi sentences with proper grammar
+- Automatic endpoint fallback if key belongs to a different platform
 
-#### Tier 2: Keyword Fallback (Trends 6-15)
+#### Tier 2: Keyword Fallback
 
-For trends beyond the top 5, the system uses a curated keyword mapping approach. This ensures reliability when AI is unavailable or rate-limited.
+If the Kimi API call fails (network error, authentication issue, invalid response), the system falls back to a curated keyword mapping approach for all trends. This ensures 100% reliability.
 
 **How it works:**
 1. Scan the English headline for known Hindi keywords (200+ word map)
@@ -191,23 +201,25 @@ Where:
 
 ### Batched AI (Tier 1)
 
-Used for: Top 5 trends
+Used for: All 15 trends
 
-**Input:** Array of 5 English headlines with categories  
-**Output:** Array of `{titleHi, hashtag, descriptionHi}` in Devanagari script  
-**API:** Groq (llama-3.3-70b-versatile) with JSON response format  
-**Timeout:** 25 seconds  
-**Fallback:** If AI fails, use Tier 2 keyword system
+**Input:** Array of 15 English headlines with categories  
+**Output:** Array of `{index, titleHi, hashtag, descriptionHi}` in Devanagari script  
+**API:** Kimi (Moonshot AI, `kimi-k2.5`) with JSON response format  
+**Endpoints tried in order:** `api.moonshot.ai` (international) → `api.moonshot.cn` (China)  
+**Timeout:** 90 seconds  
+**Fallback:** If AI fails for any trend, use Tier 2 keyword system for that trend
 
 ### Keyword Mapping (Tier 2)
 
-Used for: Trends 6-15 (and as AI fallback)
+Used for: Any trend where AI returns null or fails
 
 **Keyword map size:** 200+ words across 8 categories (sports, places, politics, technology, entertainment, finance, lifestyle, devotional, general)
 
 **Title generation:**
 ```javascript
 keywords = extractKeywords(englishTitle); // Order of appearance
+if (keywords.length >= 3) return keywords.slice(0, 3).join(' ') + ' (ट्रेंडिंग)';
 if (keywords.length >= 2) return keywords[0] + ' ' + keywords[1] + ' (ट्रेंडिंग)';
 if (keywords.length === 1) return keywords[0] + ' (ट्रेंडिंग)';
 ```
@@ -231,11 +243,11 @@ hashtag = '#' + keywords.slice(0, 2).join('').slice(0, 18);
 
 | Dimension | Batched AI (Tier 1) | Keyword Fallback (Tier 2) |
 |-----------|---------------------|---------------------------|
-| Quality | Natural, grammatical Hindi sentences | Noun phrases (understandable but less grammatical) |
-| Speed | 3-5 seconds for batch of 5 | Instant |
-| API Cost | 1 call per page load | Zero |
-| Reliability | Depends on Groq availability | 100% reliable |
-| Coverage | Top 5 trends only | All 15 trends |
+| Quality | Natural, grammatical Hindi sentences | Noun phrases (understandable but less polished) |
+| Speed | 5-10 seconds for batch of 15 | Instant |
+| API Cost | 1 call per page load (~1500 tokens) | Zero |
+| Reliability | 99%+ with endpoint fallback | 100% reliable |
+| Coverage | All 15 trends | Any trend where AI fails |
 
 ---
 
@@ -323,7 +335,7 @@ cp .env.example .env
 # Edit .env and add your API keys:
 #   NEWSAPI_KEY=your_key
 #   SERPAPI_KEY=your_key
-#   GROQ_API_KEY=your_key
+#   KIMI_API_KEY=your_key
 #   CACHE_TTL_SECONDS=21600
 #   PORT=3001
 
@@ -417,7 +429,7 @@ Returns detailed information for a single trend.
    - `NODE_ENV=production`
    - `NEWSAPI_KEY`
    - `SERPAPI_KEY`
-   - `GROQ_API_KEY`
+   - `KIMI_API_KEY`
    - `CACHE_TTL_SECONDS=21600`
 3. Railway auto-deploys on every push to the main branch
 
@@ -437,7 +449,7 @@ Returns detailed information for a single trend.
 |----------|----------|---------|-------------|
 | `NEWSAPI_KEY` | Yes | - | NewsAPI API key |
 | `SERPAPI_KEY` | Yes | - | SerpAPI API key |
-| `GROQ_API_KEY` | Yes | - | Groq API key for AI content generation |
+| `KIMI_API_KEY` | Yes | - | Kimi (Moonshot AI) API key for Hindi content generation |
 | `CACHE_TTL_SECONDS` | No | 21600 | Cache time-to-live in seconds (6 hours) |
 | `PORT` | No | 3001 | Server port |
 | `NODE_ENV` | No | development | Set to `production` for Railway |
