@@ -12,8 +12,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Health
+// Health + cache warm trigger
 app.get('/api/health', (_req, res) => {
+  // Trigger background cache warm if empty — UptimeRobot pings this every 5 min
+  import('./trending.js').then((m) => {
+    if (m.runBackgroundBuild) m.runBackgroundBuild();
+  }).catch(() => {});
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
