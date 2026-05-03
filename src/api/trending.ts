@@ -4,7 +4,11 @@ import { APIResponse, TrendingTagDetail } from '../types/trending';
 const API_BASE = '/api';
 
 export async function fetchTrending(): Promise<APIResponse> {
-  const res = await axios.get<APIResponse>(`${API_BASE}/trending?t=${Date.now()}`);
+  // Timeout after 15s — if Railway app is asleep, mobile browsers give up earlier
+  const res = await axios.get<APIResponse>(`${API_BASE}/trending?t=${Date.now()}`, {
+    timeout: 15000,
+    timeoutErrorMessage: 'सर्वर जाग रहा है, कृपया कुछ सेकंड में फिर से कोशिश करें',
+  });
   return res.data;
 }
 

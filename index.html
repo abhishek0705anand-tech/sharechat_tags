@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/sharechat-logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FF6B35" />
     <meta name="description" content="ShareChat Trending - आज क्या ट्रेंड कर रहा है" />
     <meta name="google" content="notranslate" />
@@ -14,7 +14,21 @@
     <title>ShareChat Trending</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Loading state shown before React hydrates — especially important on slow mobile networks -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#f3f4f6;font-family:system-ui,-apple-system,sans-serif;">
+        <div style="width:48px;height:48px;border:4px solid #fed7aa;border-top-color:#f97316;border-radius:50%;animation:spin 1s linear infinite;"></div>
+        <p style="margin-top:16px;color:#6b7280;font-size:14px;font-weight:600;">ShareChat Trending लोड हो रहा है...</p>
+        <p style="margin-top:4px;color:#9ca3af;font-size:12px;">पहली बार में 10-15 सेकंड लग सकते हैं</p>
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    </div>
+    <noscript>
+      <div style="padding:24px;text-align:center;font-family:system-ui,sans-serif;">
+        <h2 style="color:#dc2626;">JavaScript बंद है</h2>
+        <p>कृपया अपने ब्राउज़र में JavaScript चालू करें।</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -16,7 +16,13 @@ export function useTrending() {
       const data = await fetchTrending();
       setResponse(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load trending');
+      const msg = err instanceof Error ? err.message : 'Failed to load trending';
+      // Show a friendly message when Railway app is waking up from sleep
+      if (msg.includes('timeout') || msg.includes('Network Error') || msg.includes('ECONNREFUSED')) {
+        setError('सर्वर जाग रहा है, कृपया 30 सेकंड में फिर से कोशिश करें');
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

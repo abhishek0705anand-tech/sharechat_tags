@@ -16,7 +16,15 @@ export async function handler(req, res) {
       });
     }
 
-    const result = await buildTrendingTags();
+    // Server-side timeout: if building takes >12s, return mock data
+    // This prevents mobile users from waiting when Railway is waking up or sources are slow
+    const BUILD_TIMEOUT_MS = 12000;
+    const result = await Promise.race([
+      buildTrendingTags(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('BUILD_TIMEOUT')), BUILD_TIMEOUT_MS)
+      ),
+    ]);
     const response = {
       data: result.tags,
       lastUpdated: new Date().toISOString(),
