@@ -109,21 +109,33 @@ The system follows a modular pipeline architecture with clear separation between
    |   (Vite + TS)       |
    +----------+----------+
               |
-    +---------+---------+
-    |                   |
-    v                   v
-+---+----+       +------+------+
-| Trend  |       |  TrendCard  |
-| Feed   |       |  Component  |
-| (List) |       |  (Mobile)   |
-+---+----+       +------+------+
-    |                   |
-    v                   v
-+---+----+       +------+------+
-| Detail |       |  HeatScore  |
-| Sheet  |       |  Category   |
-| (Drag) |       |  Hashtag    |
-+--------+       +-------------+
+              v
+   +----------+----------+
+   |     Feed.tsx        |
+   |  (Trend list view)  |
+   +----------+----------+
+              |
+      +-------+-------+
+      |               |
+      v               v
++-----+-----+   +-----+-----+
+| TrendCard |   | BottomSheet|
+| (per row) |   | (overlay)  |
++-----+-----+   +-----+-----+
+      |               |
+      v               v
++-----+-----+   +-----+-----+
+| HeatScore |   | TrendDetail|
+| Category  |   | (expanded  |
+| Badge     |   |  content)  |
+| Hashtag   |   |            |
+| Title+Desc|   +------------+
+| ReelCara- |   | Detail also
+|   usel    |   | reuses:    |
++-----------+   | HeatScore  |
+                | Category   |
+                | Hashtag    |
+                +------------+
 ```
 
 ---
