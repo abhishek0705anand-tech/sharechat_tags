@@ -4,7 +4,7 @@ import { fetchRedditIndia } from './sources/reddit.js';
 import { fetchSerpapiRealtime } from './sources/serpapi.js';
 import { calculateHeatScore, fuzzyMatch } from './ranker.js';
 import { categorize } from './categorizer.js';
-import { generateHindiContentBatch } from './ai-full.js';
+import { generateHindiContentKimi } from './ai-kimi.js';
 
 // Expanded Hindi keyword map for better translations
 const hindiMap = {
@@ -825,29 +825,24 @@ export async function buildTrendingTags() {
       location: 'National',
       timestamp: new Date().toISOString(),
       isFresh: score > 80,
-      _needsAI: index < 5,
+      _needsAI: true,
       _descEn: descEn,
     };
   });
 
-  // Batch AI call for top 5 trends — single API call instead of 5 separate calls
-  const aiItems = baseTags
-    .filter((t) => t._needsAI)
-    .map((t, i) => ({ index: i, titleEn: t.titleEn, category: t.category }));
+  // Batch AI call for ALL trends using Kimi — single API call for all 15 headlines
+  const aiItems = baseTags.map((t, i) => ({ index: i, titleEn: t.titleEn, category: t.category }));
+  const aiResults = await generateHindiContentKimi(aiItems);
 
-  if (aiItems.length > 0) {
-    const aiResults = await generateHindiContentBatch(aiItems);
-    aiResults.forEach((res, i) => {
-      const tag = baseTags.find((t) => t._needsAI && t.titleEn === aiItems[i].titleEn);
-      if (tag && res) {
-        tag.titleHi = res.titleHi;
-        tag.hashtag = res.hashtag || toHindiHashtag(tag.titleEn);
-        tag.descriptionHi = res.descriptionHi;
-      }
-    });
-  }
+  aiResults.forEach((res, i) => {
+    const tag = baseTags[i];
+    if (tag && res) {
+      tag.titleHi = res.titleHi;
+      tag.hashtag = res.hashtag || toHindiHashtag(tag.titleEn);
+      tag.descriptionHi = res.descriptionHi;
+    }
+  });
 
-  // Fill in fallback for any tags that didn't get AI content
   const tags = baseTags.map((tag) => ({
     ...tag,
     hashtag: tag.hashtag || toHindiHashtag(tag.titleEn),
